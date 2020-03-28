@@ -1,0 +1,26 @@
+resources:
+- ../../base
+
+namespace: listmonk-local
+
+# Common Prefix to be applied to all resources
+namePrefix: listmonk-
+nameSuffix: -local
+# Common Labels applied to all resources
+commonLabels:
+  app.kubernetes.io/managed-by: team-listmonk
+
+configMapGenerator:
+  - name: app-config
+    files:
+      - config.toml=configs/config.toml
+
+secretGenerator:
+  - name: app-secrets
+    literals:
+      - LISTMONK_db__host=listmonk-postgres-local
+  - name: db-secrets
+    literals:
+      - POSTGRES_PASSWORD=listmonk
+      - POSTGRES_USER=listmonk
+      - POSTGRES_DB=listmonk

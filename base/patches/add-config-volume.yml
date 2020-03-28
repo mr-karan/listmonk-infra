@@ -1,0 +1,12 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app # Targets the deployment with `name:app`
+spec:
+  template:
+    spec:
+      volumes:
+        - name: config-dir
+          configMap:
+            name: app-config

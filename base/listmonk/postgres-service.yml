@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  labels:
+    app.kubernetes.io/component: svc-headless
+spec:
+  ports:
+  - port: 5432
+    name: db-port
+    targetPort: db-port
+    protocol: TCP
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/component: db
+  clusterIP: None

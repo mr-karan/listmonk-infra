@@ -1,0 +1,12 @@
+# vim kustomization.yml
+# List of all resources used for deploying Listmonk
+resources:
+- listmonk/app-deployment.yml
+- listmonk/app-service.yml
+- listmonk/db-statefulset.yml
+- listmonk/postgres-service.yml
+- add-db-volume.yml
+- add-db-migration.yml
+
+patchesStrategicMerge:
+  - patches/add-config-volume.yml

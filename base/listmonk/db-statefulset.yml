@@ -1,0 +1,36 @@
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: db
+  serviceName: postgres
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: db
+    spec:
+      containers:
+      - name: postgres
+        image: postgres:12.2-alpine
+        ports:
+        - containerPort: 5432
+          name: db-port
+        resources:
+          requests:
+            memory: 400Mi
+            cpu: 250m
+          limits:
+            memory: 800Mi
+            cpu: 500m
+        envFrom:
+          - secretRef:
+              name: db-secrets
+        volumeMounts:
+        - mountPath: /var/lib/postgres
+          name: postgres-storage
+      volumes:
+        - name: postgres-storage

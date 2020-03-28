@@ -1,0 +1,64 @@
+workloads:
+  - name: listmonk # name of the project
+    deployments:
+      - name: app # name of the individual component
+        replicas: 1
+        labels:
+          - name: 'app.kubernetes.io/component: app'
+        containers:
+          - name: app
+            createService: true
+            image: 'localhost:32000/listmonk:0.5'
+            command: '["./listmonk"]'
+            args: '["--config", "/etc/listmonk/config.toml"]'
+            envSecret: app-secrets
+            ports:
+            - name: app-port
+              port: 9000
+            cpuLimits: 800m
+            memoryLimits: 500Mi
+            cpuRequests: 400m
+            memoryRequests: 250Mi
+            readinessPort: 9000
+            readinessPath: /
+            livenessPort: 9000
+            livenessPath: /
+            volumeMounts:
+              - name: config-dir
+                mountPath: /etc/listmonk
+                # subPath: config.toml
+        volumes:
+          - name: config-dir
+    services:
+      - name: postgres
+        type: ClusterIP
+        headless: true
+        ports:
+          - name: db-port
+            targetPort: db-port
+            port: 5432
+        labels:
+          - name: 'app.kubernetes.io/component: svc-headless'
+        selectors:
+          - name: 'app.kubernetes.io/component: db'
+    statefulsets:
+      - name: db
+        serviceName: postgres
+        labels:
+          - name: 'app.kubernetes.io/component: db'
+        containers:
+          - name: postgres
+            image: 'postgres:12.2-alpine'
+            ports:
+            - name: db-port
+              port: 5432
+            envSecret: db-secrets
+            volumeMounts:
+              - name: postgres-storage
+                mountPath: /var/lib/postgres
+            cpuLimits: 500m
+            memoryLimits: 800Mi
+            cpuRequests: 250m
+            memoryRequests: 400Mi
+        volumes:
+          - name: postgres-storage

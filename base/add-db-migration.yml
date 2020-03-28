@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: db-init
+spec:
+  template:
+    spec:
+      containers:
+      - name: listmonk-db-init
+        image: localhost:32000/listmonk:0.5
+        command: [sh, -c, "yes | ./listmonk --install"]
+        envFrom:
+          - secretRef:
+              name: app-secrets
+      restartPolicy: Never
+  backoffLimit: 5
+  ttlSecondsAfterFinished: 10
+  activeDeadlineSeconds: 100

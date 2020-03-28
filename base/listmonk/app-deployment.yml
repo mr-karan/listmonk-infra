@@ -1,0 +1,62 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+  labels:
+    app.kubernetes.io/component: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/component: app
+    spec:
+      containers:
+      - name: app
+        image: localhost:32000/listmonk:0.5
+        command: ["./listmonk"]
+        args: ["--config", "/etc/listmonk/config.toml"]
+        ports:
+        - containerPort: 9000
+          name: app-port
+        resources:
+          requests:
+            memory: 250Mi
+            cpu: 400m
+          limits:
+            memory: 500Mi
+            cpu: 800m
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 9000
+            httpHeaders:
+            - name: X-Kubernetes
+              value: readinessProbe
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          failureThreshold: 5
+          timeoutSeconds: 7
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 9000
+            httpHeaders:
+            - name: X-Kubernetes
+              value: livenessProbe
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          timeoutSeconds: 7
+          failureThreshold: 5
+        envFrom:
+          - secretRef:
+              name: app-secrets
+        volumeMounts:
+        - mountPath: /etc/listmonk
+          name: config-dir
+      volumes:
+        - name: config-dir
